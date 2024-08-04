@@ -21,8 +21,8 @@ pipeline {
 
         stage('Wait for SonarQube') {
             steps {
-                // Esperar 30 segundos para dar tiempo a SonarQube para arrancar completamente
-                sh 'sleep 30'
+                // Esperar 10 segundos para dar tiempo a SonarQube para arrancar completamente
+                sh 'sleep 10'
             }
         }
 
@@ -31,6 +31,13 @@ pipeline {
                 withSonarQubeEnv('SonarQube') { // 'SonarQube' debe ser el nombre de la instalación de SonarQube en Jenkins
                     sh 'mvn sonar:sonar -Dsonar.host.url=$SONARQUBE_URL -Dsonar.login=$SONARQUBE_TOKEN'
                 }
+            }
+        }
+
+        stage('Wait for SonarQube') {
+            steps {
+                // Esperar 10 segundos para dar tiempo a Quality Gate
+                sh 'sleep 10'
             }
         }
 

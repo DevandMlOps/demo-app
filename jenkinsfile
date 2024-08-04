@@ -1,14 +1,37 @@
 pipeline {
-        agent none
-        stages {
-         
-          stage("build & SonarQube Scanner") {
-            agent any
+    agent any
+
+    environment {
+        SONARQUBE_URL = "http://sonarqube:9000"
+    }
+
+    stages {
+        stage('Checkout') {
             steps {
-              withSonarQubeEnv('sonarqube_server') {
-                sh 'mvn clean package sonar:sonar'
-              }
+                checkout scm
             }
-          }
         }
-      }
+
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') { // 'SonarQube' debe ser el nombre de la instalación de SonarQube en Jenkins
+                    sh 'mvn sonar:sonar -Dsonar.host.url=$SONARQUBE_URL'
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+    }
+}

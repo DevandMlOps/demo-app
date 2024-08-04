@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        SONARQUBE_URL = "http://localhost:9000"
+        SONARQUBE_URL = "http://sonarqube:9000"
         SONARQUBE_TOKEN = credentials('SonarQube') // Asegúrate de que 'SonarQube' es el ID correcto en Jenkins
     }
 

@@ -34,7 +34,7 @@ pipeline {
             }
         }
 
-        stage('Wait for SonarQube') {
+        stage('Wait for Quality Gate') {
             steps {
                 // Esperar 10 segundos para dar tiempo a Quality Gate
                 sh 'sleep 10'

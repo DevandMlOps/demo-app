@@ -18,6 +18,13 @@ pipeline {
             }
         }
 
+        stage('Wait for SonarQube') {
+            steps {
+                // Esperar 60 segundos para dar tiempo a SonarQube para arrancar completamente
+                sh 'sleep 60'
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') { // 'SonarQube' debe ser el nombre de la instalación de SonarQube en Jenkins

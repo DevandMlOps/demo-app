@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         SONARQUBE_URL = "http://sonarqube:9000"
+        SONARQUBE_TOKEN = credentials('SonarQube_jenkins') // Asegúrate de que 'SonarQube_jenkins' es el ID correcto en Jenkins
+    
     }
 
     stages {

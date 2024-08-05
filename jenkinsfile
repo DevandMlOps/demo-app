@@ -41,22 +41,32 @@ pipeline {
             }
         }
 
-        stage('Check Quality Gate') {
+       stage('Quality Gate') {
             steps {
                 script {
-                    def qualityGate = waitUntilQualityGate abortPipeline: false
-                    echo "Quality Gate status: ${qualityGate.status}"
-                    echo "Quality Gate details: ${qualityGate}"
-
-                    if (qualityGate.status != 'OK') {
-                        echo "Quality Gate failed with status: ${qualityGate.status}"
-                        echo "Quality Gate conditions:"
-                        qualityGate.conditions.each { condition ->
-                            echo "- ${condition.metricKey}: ${condition.status}"
+                    def maxAttempts = 10
+                    def attempt = 1
+                    def status = "NONE"
+                    
+                    while (status != "SUCCESS" && attempt <= maxAttempts) {
+                        def response = sh(script: "curl -u ${SONARQUBE_TOKEN}: http://sonarqube:9000/api/qualitygates/project_status?projectKey=com.example:demo-app", returnStdout: true).trim()
+                        status = sh(script: "echo '${response}' | jq -r .projectStatus.status", returnStdout: true).trim()
+                        
+                        if (status == "OK") {
+                            echo "Quality Gate passed!"
+                            break
+                        } else if (status == "ERROR") {
+                            error "Quality Gate failed!"
+                        } else {
+                            echo "Waiting for Quality Gate to complete. Attempt ${attempt}/${maxAttempts}"
+                            sleep 30  // Espera 30 segundos antes de verificar de nuevo
                         }
-                        error "Pipeline aborted due to quality gate failure: ${qualityGate.status}"
-                    } else {
-                        echo "Quality Gate passed successfully"
+                        
+                        attempt++
+                    }
+                    
+                    if (attempt > maxAttempts) {
+                        error "Quality Gate did not complete in time"
                     }
                 }
             }
